@@ -16,7 +16,33 @@ AMD.ts is meant to address that with a small footprint and minimal overhead.
 
 Usage
 -----
-TBD.
+There are two ways to use AMD.ts, as a TypeScript source file to be inlined in your `tsc` output or as an external JavaScript resource.
+
+### Inlined ###
+1. Download [`amd.ts`](src/amd.ts) from this repository and place it somewhere in your TypeScript project's path.
+1.1 Alternatively you can install AMD.ts using `npm install amd.ts`, the file can then be found in `node_modules/amd.ts/src/amd.ts`.
+2. Have a "main" file where to call require to initialize your logic, this is where you would also add a `ref` comment to ensure the `require` function is available:
+```typescript
+// main.ts
+/// <reference path="<PATH_TO>/amd.ts" />
+require(['module1', 'module2'], (mod1: any, mod2: any) => /* logic using required modules */);
+```
+3. Change your `tsconfig.json` file to produce a bundle with all your modules and `amd.ts`:
+```json
+{
+    ...
+    "module": "amd",
+    "outFile": "<OUTPUT_PATH>.js"
+    ...
+}
+```
+3.1. Alternatively pass those options to `tsc` through the command line.
+4. Invoke `tsc`, the compiler will produce a bundle with all your modules and AMD.ts inlined ready to be used in your web pages.
+
+### External Javascript Resouce ###
+AMD.ts is available in compiled form both via `npm` and at [`npmcdn`](https://npmcdn.com/amd.ts).
+
+It can be added to your web pages usign a script tag, then you can either compile your modules as separate files and add them to the page using multiple script tags, or you can create a bundle with the modules as point #3 above shows.
 
 License
 -------
