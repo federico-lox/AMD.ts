@@ -1,0 +1,16 @@
+image: node:6.2.0
+
+cache:
+  paths:
+  - node_modules/
+
+stages:
+  - test
+
+build:
+  stage: test
+  script:
+   - npm install
+   - npm test
+  tags:
+    - docker
