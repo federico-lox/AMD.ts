@@ -1,7 +1,7 @@
 // TODO: Support reloading/re-defining modules
-declare var exports, global;
+declare var exports: any, global: any;
 
-((context) => {
+((context: any) => {
     type defmodule = (...deps: any[]) => any;
     type depslist = string[];
     type dict<T> = { [key: string]: T };
