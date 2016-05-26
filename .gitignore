@@ -1,0 +1,18 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# npm and node
+.npm
+.node_repl_history
+.lock-wscript
+
+# IDEs
+.vscode
+
+# OS trash
+Thumbs.db
+.DS_Store
+
+# Artifacts
