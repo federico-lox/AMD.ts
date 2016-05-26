@@ -17,4 +17,4 @@ Thumbs.db
 .DS_Store
 
 # Artifacts
-build
+build/test.js
