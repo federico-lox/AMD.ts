@@ -53,9 +53,7 @@ declare var exports, global;
 
     function initializer(id: string, dependencies: depslist, definition: defmodule) {
         // Counting down from deps.length to 0 using a local counter could be an optimization although less safe
-        const missingCount = dependencies.filter((dep) => !(dep in modules)).length;
-
-        if (missingCount === 0) {
+        if (dependencies.filter((dep) => !(dep in modules)).length === 0) {
             modules[id] = definition.apply(null, dependencies.map((dep) => modules[dep]));
             processDependencies(id);
             initializers[id] = null;
