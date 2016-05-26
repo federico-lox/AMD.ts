@@ -1,15 +1,15 @@
 {
     "compilerOptions": {
-        "inlineSourceMap": true,
-        "module": "amd",
+        "module": "none",
         "noImplicitAny": true,
         "noImplicitReturns": true,
         "outDir": "build",
-        "outFile": "build/test.js",
-        "removeComments": false,
+        "removeComments": true,
+        "sourceMap": false,
         "target": "es5"
     },
     "exclude": [
-        "node_modules"
+        "node_modules",
+        "tst"
     ]
 }
