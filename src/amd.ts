@@ -63,6 +63,7 @@ declare var exports, global;
     }
 
     function processDependencies(name: string) {
+        // TODO: consider making this concurrent
         if (name in inverseDependencyMap) {
             Object.keys(inverseDependencyMap[name]).forEach((parent) => {
                 if (!isVoid(initializers[parent])) initializers[parent]();
