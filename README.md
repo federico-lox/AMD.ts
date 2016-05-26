@@ -1,6 +1,6 @@
-SystemTS
+AMD.ts
 ========
-SystemTS is a compact implementation of [SystemJS](https://github.com/systemjs/systemjs) API subset meant to support modules emitted by the [TypeScript](https://typescriptlang.org) compiler.
+AMD.ts is a compact, specialized implementation of [AMD](https://github.com/amdjs/amdjs-api) meant to support modules emitted by the [TypeScript](https://typescriptlang.org) compiler.
 
 Rationale
 ---------
@@ -12,7 +12,7 @@ Usually to support browser environments, though, additional tooling and tedious 
 
 While the TypeScript compiler is able to "bundle" some module formats (at the time of writing this is possible by using the `--outFile` option when using *AMD* or *SystemJS* as the target module system) functioning as a low-overhead asset manager, it offers no mechanism to load and process its output in a browser enviornment.
 
-SystemTS is meant to address that with a small footprint and minimal overhead.
+AMD.ts is meant to address that with a small footprint and minimal overhead.
 
 Usage
 -----
@@ -20,4 +20,4 @@ TBD.
 
 License
 -------
-SystemTS is open source software and is free for any use under the [MIT License](LICENSE)
+AMD.ts is open source software and is free for any use under the [MIT License](LICENSE)
