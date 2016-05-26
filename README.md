@@ -20,4 +20,4 @@ TBD.
 
 License
 -------
-SystemTS is open source software and is free for any use under the [MIT License](LICENSE.md)
+SystemTS is open source software and is free for any use under the [MIT License](LICENSE)
