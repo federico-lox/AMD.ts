@@ -4,17 +4,18 @@ declare var exports, global;
 ((context) => {
     type defmodule = (...deps: any[]) => any;
     type depslist = string[];
+    type dict<T> = { [key: string]: T };
 
     const
-        inverseDependencyMap = {},
-        modules = {},
-        initializers = {};
+        inverseDependencyMap: dict<dict<void>> = {},
+        modules: dict<any> = {},
+        initializers: dict<Function> = {};
 
     function require(dependencies: depslist, definition: defmodule) {
         if (isVoid(dependencies) || isVoid(definition)) {
             throw new Error(`Missing or null parameters: dependencies ${dependencies} - definition ${definition}`);
         } else {
-            processModule(`require-${Date.now()}.${Math.random()}`, dependencies, definition);
+            processDefinition(`require-${Date.now()}.${Math.random()}`, dependencies, definition);
         }
     }
 
@@ -23,7 +24,7 @@ declare var exports, global;
             throw new Error(`Missing or null parameters: name ${name} - dependencies ${dependencies} - definition ${definition}`);
         } else {
             // TODO: remove from modules if exists to allow reloading/redefining in the future
-            processModule(name, dependencies, definition);
+            processDefinition(name, dependencies, definition);
         }
     }
 
@@ -35,7 +36,7 @@ declare var exports, global;
         return value == null;
     }
 
-    function processModule(name: string, dependencies: depslist, definition: defmodule) {
+    function processDefinition(name: string, dependencies: depslist, definition: defmodule) {
         if (dependencies.length === 0) {
             modules[name] = definition();
         } else {
@@ -43,20 +44,20 @@ declare var exports, global;
                 initializers[name] = initializer.bind(null, name, dependencies, definition);
             }
 
-            dependencies.forEach((dep) => {
-                if (!(dep in inverseDependencyMap)) inverseDependencyMap[dep] = {};
-                inverseDependencyMap[dep][name] = null;          
-                processDependencies(dep);
+            dependencies.forEach((dependency) => {
+                if (!(dependency in inverseDependencyMap)) inverseDependencyMap[dependency] = {};
+                inverseDependencyMap[dependency][name] = null;
+                processDependencies(dependency);
             });
         }
     }
 
-    function initializer(id: string, dependencies: depslist, definition: defmodule) {
+    function initializer(name: string, dependencies: depslist, definition: defmodule) {
         // Counting down from deps.length to 0 using a local counter could be an optimization although less safe
-        if (dependencies.filter((dep) => !(dep in modules)).length === 0) {
-            modules[id] = definition.apply(null, dependencies.map((dep) => modules[dep]));
-            processDependencies(id);
-            initializers[id] = null;
+        if (dependencies.filter((dependency) => !(dependency in modules)).length === 0) {
+            modules[name] = definition.apply(null, dependencies.map((dependency) => modules[dependency]));
+            processDependencies(name);
+            initializers[name] = null;
         }
     }
 
