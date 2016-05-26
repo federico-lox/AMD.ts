@@ -1,4 +1,4 @@
-image: node:6.2.0
+image: node:6.2.0:slim
 
 cache:
   paths:
@@ -7,10 +7,18 @@ cache:
 stages:
   - test
 
-build:
+run-test:
   stage: test
   script:
    - npm install
    - npm test
+  tags:
+    - docker
+
+build:
+  stage: test
+  script:
+   - npm install
+   - npm run build
   tags:
     - docker
