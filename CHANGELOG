@@ -1,0 +1,9 @@
+v1.0.1
+------
+* Minor internal change to how the require and define functions are exposed to the
+global scope.
+* Tests now can run also in a browser environment.
+
+v1.0.0
+------
+First release.
