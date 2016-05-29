@@ -47,3 +47,7 @@ It can be added to your web pages usign a script tag, then you can either compil
 License
 -------
 AMD.ts is open source software and is free for any use under the [MIT License](LICENSE)
+
+Changelog
+---------
+Information about the changes across versions in available in the [changelog](CHANGELOG)
