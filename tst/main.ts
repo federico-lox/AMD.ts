@@ -1,33 +1,38 @@
 /// <reference path="../src/amd.ts" />
+interface Error {
+        stack: string;
+}
+
 namespace test {
-    declare const
-        global: any,
-        require: any;
-        
-    const assert = require('assert');
+    function assert(value: boolean) {
+        if (value !== true) {
+            const [, , location] = (new Error).stack.split('\n');
+            throw new Error(`Failed assertion ${location.trim()}`);
+        }
+    }
 
     // Test variants of modules emitted by tsc...
-    
+
     // ... as a single dependency
-    global.require(['tst/single-export'], (s: any) => assert.strictEqual(s.plusOne(4), 5));
-    
+    require(['tst/single-export'], (s: any) => assert(s.plusOne(4) === 5));
+
     // ... as multiple dependencies, one already defined
-    global.require(['tst/multiple-exports', 'tst/single-export'], (m: any, s: any) => {
-        assert.strictEqual(m.compare(new m.NumericValue(s.plusOne(4)), m.five), true);
+    require(['tst/multiple-exports', 'tst/single-export'], (m: any, s: any) => {
+        assert(m.compare(new m.NumericValue(s.plusOne(4)), m.five) === true);
     });
-    
+
     // ... as multiple depdencies not yet defined
-    global.require(['tst/assign-require', 'tst/import-as'], (r: any, i: any) => {
-        assert.strictEqual(r.test(), true);
-        assert.strictEqual(i.default, true)
+    require(['tst/assign-require', 'tst/import-as'], (r: any, i: any) => {
+        assert(r.test() === true);
+        assert(i.default === true)
     });
 
     // Test mixed sequence of inter-dependent modules
-    global.define('a', [], () => 2)
-    global.require(['b', 'c', 'a'], (b: any, c: any, a: any) => assert.strictEqual(b + c.a + a, 10));
-    global.define('b', ['c'], (c: any) => c.a + 2);
-    global.define('c', ['a'], (a: any) => ({ a: 1 + a }));
-    global.require(['a', 'd'], (a: any, d: any) => assert.strictEqual(a + d.z, 10));
-    global.define('d', ['e'], (e: any) => ({ z: 4 + e }));
-    global.define('e', ['a'], (a: any) => 2 + a);
+    define('a', [], () => 2)
+    require(['b', 'c', 'a'], (b: any, c: any, a: any) => assert(b + c.a + a === 10));
+    define('b', ['c'], (c: any) => c.a + 2);
+    define('c', ['a'], (a: any) => ({ a: 1 + a }));
+    require(['a', 'd'], (a: any, d: any) => assert(a + d.z === 10));
+    define('d', ['e'], (e: any) => ({ z: 4 + e }));
+    define('e', ['a'], (a: any) => 2 + a);
 }

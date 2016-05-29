@@ -11,6 +11,7 @@ var AMD;
                 processDefinition("require-" + Date.now() + "." + Math.random(), dependencies, definition);
             }
         }
+        ts.require = require;
         function define(name, dependencies, definition) {
             if (isVoid(name) || isVoid(dependencies) || isVoid(definition)) {
                 throw new Error("define - missing or null parameters: name " + name + " - dependencies " + dependencies + " - definition " + definition);
@@ -19,6 +20,7 @@ var AMD;
                 processDefinition(name, dependencies, definition);
             }
         }
+        ts.define = define;
         function isVoid(value) {
             return value == null;
         }
@@ -59,9 +61,6 @@ var AMD;
                 });
             }
         }
-        (function (context) {
-            context.require = require;
-            context.define = define;
-        })(typeof window !== 'undefined' ? window : global);
     })(ts = AMD.ts || (AMD.ts = {}));
 })(AMD || (AMD = {}));
+var require = AMD.ts.require, define = AMD.ts.define;

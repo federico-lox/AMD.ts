@@ -11,7 +11,7 @@ namespace AMD.ts {
         modules: dict<any> = {},
         initializers: dict<Function> = {};
 
-    function require(dependencies: depslist, definition: defmodule): void {
+    export function require(dependencies: depslist, definition: defmodule): void {
         if (isVoid(dependencies) || isVoid(definition)) {
             throw new Error(`require - missing or null parameters: dependencies ${dependencies} - definition ${definition}`);
         } else {
@@ -19,7 +19,7 @@ namespace AMD.ts {
         }
     }
 
-    function define(name: string, dependencies: depslist, definition: defmodule): void {
+    export function define(name: string, dependencies: depslist, definition: defmodule): void {
         if (isVoid(name) || isVoid(dependencies) || isVoid(definition)) {
             throw new Error(`define - missing or null parameters: name ${name} - dependencies ${dependencies} - definition ${definition}`);
         } else {
@@ -77,9 +77,8 @@ namespace AMD.ts {
             });
         }
     }
-
-    ((context: any) => {
-        context.require = require;
-        context.define = define;
-    })(typeof window !== 'undefined' ? window : global);
 }
+
+const
+    require = AMD.ts.require,
+    define = AMD.ts.define;
