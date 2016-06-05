@@ -1,4 +1,4 @@
-AMD.ts [![build status](https://gitlab.com/federico-lox/amd.ts/badges/master/build.svg)](https://gitlab.com/federico-lox/amd.ts/commits/master) [![npm version](https://badge.fury.io/js/amd.ts.svg)](https://badge.fury.io/js/amd.ts)
+AMD.ts [![Build Status](https://travis-ci.org/federico-lox/AMD.ts.svg?branch=master)](https://travis-ci.org/federico-lox/AMD.ts) [![npm version](https://badge.fury.io/js/amd.ts.svg)](https://badge.fury.io/js/amd.ts)
 ========
 AMD.ts is a compact, specialized implementation of [AMD](https://github.com/amdjs/amdjs-api) meant to support modules emitted by the [TypeScript](https://typescriptlang.org) compiler.
 
