@@ -1,3 +1,9 @@
+v1.1.0
+------
+* Calls to describe and require can precede AMD.ts in a bundle (see issue #1)
+* A minified JavaScript version is now provided via UglifyJS
+* Improved tests output and coverage 
+
 v1.0.1
 ------
 * Minor internal change to how the require and define functions are exposed to the

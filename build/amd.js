@@ -1,66 +1,51 @@
-var AMD;
-(function (AMD) {
-    var ts;
-    (function (ts) {
-        var inverseDependencyMap = {}, modules = {}, initializers = {};
-        function require(dependencies, definition) {
-            if (isVoid(dependencies) || isVoid(definition)) {
-                throw new Error("require - missing or null parameters: dependencies " + dependencies + " - definition " + definition);
-            }
-            else {
-                processDefinition("require-" + Date.now() + "." + Math.random(), dependencies, definition);
-            }
+function require(dependencies, definition) {
+    define("require." + Date.now() + "." + Math.random(), dependencies, definition);
+}
+function define(name, dependencies, definition) {
+    function processDefinition(name, dependencies, definition, state) {
+        var deps = (dependencies.length > 0 && dependencies[0] === "require" && dependencies[1] === "exports") ?
+            (dependencies.slice(2)) : dependencies;
+        if (deps.length === 0) {
+            state.modules[name] = resolve(name, [], definition);
+            processUpstreamDependencies(name, state);
         }
-        ts.require = require;
-        function define(name, dependencies, definition) {
-            if (isVoid(name) || isVoid(dependencies) || isVoid(definition)) {
-                throw new Error("define - missing or null parameters: name " + name + " - dependencies " + dependencies + " - definition " + definition);
+        else {
+            if (!(name in state.trackers)) {
+                state.trackers[name] = track.bind(null, name, deps, definition, state);
             }
-            else {
-                processDefinition(name, dependencies, definition);
-            }
+            deps.forEach(function (dependency) {
+                if (!(dependency in state.inverseDependencyMap))
+                    state.inverseDependencyMap[dependency] = {};
+                state.inverseDependencyMap[dependency][name] = null;
+                processUpstreamDependencies(dependency, state);
+            });
         }
-        ts.define = define;
-        function isVoid(value) {
-            return value == null;
+    }
+    function track(name, dependencies, definition, state) {
+        if (dependencies.filter(function (dependency) { return !(dependency in state.modules); }).length === 0) {
+            state.modules[name] = resolve(name, dependencies.map(function (dependency) { return state.modules[dependency]; }), definition);
+            processUpstreamDependencies(name, state);
+            state.trackers[name] = null;
         }
-        function processDefinition(name, dependencies, definition) {
-            var deps = (dependencies.length > 0 && dependencies[0] === "require" && dependencies[1] === "exports") ?
-                (dependencies.slice(2)) : dependencies;
-            if (deps.length === 0)
-                modules[name] = resolve(name, [], definition);
-            else {
-                if (!(name in initializers)) {
-                    initializers[name] = initializer.bind(null, name, deps, definition);
-                }
-                deps.forEach(function (dependency) {
-                    if (!(dependency in inverseDependencyMap))
-                        inverseDependencyMap[dependency] = {};
-                    inverseDependencyMap[dependency][name] = null;
-                    processDependencies(dependency);
-                });
-            }
+    }
+    function processUpstreamDependencies(name, state) {
+        if (name in state.inverseDependencyMap) {
+            Object.keys(state.inverseDependencyMap[name]).forEach(function (parent) {
+                if (state.trackers[parent] != null)
+                    state.trackers[parent]();
+            });
         }
-        function initializer(name, dependencies, definition) {
-            if (dependencies.filter(function (dependency) { return !(dependency in modules); }).length === 0) {
-                modules[name] = resolve(name, dependencies.map(function (dependency) { return modules[dependency]; }), definition);
-                processDependencies(name);
-                initializers[name] = null;
-            }
-        }
-        function resolve(name, dependencies, definition) {
-            var exported = {}, returned = definition.apply(null, (definition.length === dependencies.length + 2) ?
-                [require, exported].concat(dependencies) : dependencies);
-            return Object.keys(exported).length === 0 ? returned : exported;
-        }
-        function processDependencies(name) {
-            if (name in inverseDependencyMap) {
-                Object.keys(inverseDependencyMap[name]).forEach(function (parent) {
-                    if (!isVoid(initializers[parent]))
-                        initializers[parent]();
-                });
-            }
-        }
-    })(ts = AMD.ts || (AMD.ts = {}));
-})(AMD || (AMD = {}));
-var require = AMD.ts.require, define = AMD.ts.define;
+    }
+    function resolve(name, dependencies, definition) {
+        var exported = {}, returned = definition.apply(null, (definition.length === dependencies.length + 2) ?
+            [require, exported].concat(dependencies) : dependencies);
+        return Object.keys(exported).length === 0 ? returned : exported;
+    }
+    if (name == null || dependencies == null || definition == null) {
+        throw new Error("Missing or wrong parameters for module definition: name " + name + " - dependencies " + dependencies + " - definition " + definition);
+    }
+    var def = define;
+    if (def.__state__ == null)
+        def.__state__ = { inverseDependencyMap: {}, modules: {}, trackers: {} };
+    processDefinition(name, dependencies, definition, def.__state__);
+}

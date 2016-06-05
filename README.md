@@ -12,7 +12,7 @@ Usually to support browser environments, though, additional tooling and tedious 
 
 While the TypeScript compiler is able to "bundle" some module formats (at the time of writing this is possible by using the `--outFile` option when using *AMD* or *SystemJS* as the target module system) functioning as a low-overhead asset manager, it offers no mechanism to load and process its output in a browser enviornment.
 
-AMD.ts is meant to address that with a small footprint and minimal overhead.
+AMD.ts is meant to address that with a small footprint (**1K minified, 0.5K gzipped**) and minimal overhead.
 
 Usage
 -----
@@ -40,9 +40,9 @@ require(['module1', 'module2'], (mod1: any, mod2: any) => /* logic using require
 4. Invoke `tsc`, the compiler will produce a bundle with all your modules and AMD.ts inlined ready to be used in your web pages.
 
 ### External Javascript Resouce ###
-AMD.ts is available in compiled form [in this repository](build/amd.js), via [`npm`](http://npmjs.com/package/amd.ts) and at [`npmcdn`](https://npmcdn.com/amd.ts).
+AMD.ts is available in compiled form [in this repository](build/amd.js) ([minified version](build/amd.min.js)), via [`npm`](http://npmjs.com/package/amd.ts) and at [`npmcdn`](https://npmcdn.com/amd.ts) ([minified version](https://npmcdn.com/amd.ts/build/amd.min.js)).
 
-It can be added to your web pages usign a script tag, then you can either compile your modules as separate files and add them to the page using multiple script tags, or you can create a bundle with the modules as point #3 above shows.
+It can be added to a HTML page using a script tag, then you can either compile your modules as separate files and add them to the page using multiple script tags, or you can create a bundle with the modules as point #3 above shows. In this case make sure AMD.ts is loaded before any module definition or call to `require`.
 
 License
 -------
