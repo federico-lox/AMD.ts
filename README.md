@@ -19,8 +19,7 @@ Usage
 There are two ways to use AMD.ts, as a TypeScript source file to be inlined in your `tsc` output or as an external JavaScript resource.
 
 ### Inlined ###
-1. Download [`amd.ts`](src/amd.ts) from this repository and place it somewhere in your TypeScript project's path.
-1.1 Alternatively you can install AMD.ts using [`npm`](http://npmjs.com/package/amd.ts), the file can then be found in `node_modules/amd.ts/src/amd.ts`.
+1. Download [`amd.ts`](src/amd.ts) from this repository and place it somewhere in your TypeScript project's path. Alternatively you can install AMD.ts using [`npm`](http://npmjs.com/package/amd.ts), the file can then be found in `node_modules/amd.ts/src/amd.ts`.
 2. Have a "main" file where to call require to initialize your logic, this is where you would also add a `ref` comment to ensure the `require` function is available:
 ```typescript
 // main.ts
@@ -36,7 +35,7 @@ require(['module1', 'module2'], (mod1: any, mod2: any) => /* logic using require
     ...
 }
 ```
-3.1. Alternatively pass those options to `tsc` through the command line.
+Alternatively pass those options to `tsc` through the command line.
 4. Invoke `tsc`, the compiler will produce a bundle with all your modules and AMD.ts inlined ready to be used in your web pages.
 
 ### External Javascript Resouce ###
