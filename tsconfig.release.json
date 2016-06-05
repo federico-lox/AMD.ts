@@ -9,6 +9,7 @@
         "target": "es5"
     },
     "exclude": [
+        "build",
         "node_modules",
         "tst"
     ]
