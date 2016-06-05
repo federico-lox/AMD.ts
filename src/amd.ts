@@ -1,62 +1,72 @@
-namespace AMD.ts {
-    // TODO: Support reloading/re-defining modules
+// The require and define functions are defined directly as self-contained
+// top-level functions to ensure hoisting makes them available at any point in
+// the "bundle" produced by the TypeScript compiler, this is done in order to 
+// avoid developers using AMD.ts to force inclusion/ execution order and work 
+// against the compiler itself.
 
-    declare var exports: any, global: any;
-    export type defmodule = (...deps: any[]) => any;
-    export type depslist = string[];
+// NOTE: The code below purposely uses loose equality checks (==) against null
+// to detect both null and undefined.
+// TODO: Support reloading/re-defining modules
+
+function require(dependencies: string[], definition: (...deps: any[]) => any): void {
+    // A definition of a require call is nothing more than a nameless AMD
+    // module, treat it as such.
+    // TODO: make this concurrent
+    define(`require.${Date.now()}.${Math.random()}`, dependencies, definition);
+}
+
+function define(name: string, dependencies: string[], definition: (...deps: any[]) => any): void {
+    type depslist = string[];
+    type defmodule = (...deps: any[]) => any;
     type dict<T> = { [key: string]: T };
+    type state = {
+        inverseDependencyMap: dict<dict<void>>,
+        modules: dict<any>,
+        trackers: dict<Function>
+    };
 
-    const
-        inverseDependencyMap: dict<dict<void>> = {},
-        modules: dict<any> = {},
-        initializers: dict<Function> = {};
-
-    export function require(dependencies: depslist, definition: defmodule): void {
-        if (isVoid(dependencies) || isVoid(definition)) {
-            throw new Error(`require - missing or null parameters: dependencies ${dependencies} - definition ${definition}`);
-        } else {
-            processDefinition(`require-${Date.now()}.${Math.random()}`, dependencies, definition);
-        }
-    }
-
-    export function define(name: string, dependencies: depslist, definition: defmodule): void {
-        if (isVoid(name) || isVoid(dependencies) || isVoid(definition)) {
-            throw new Error(`define - missing or null parameters: name ${name} - dependencies ${dependencies} - definition ${definition}`);
-        } else {
-            // TODO: remove from modules if exists to allow reloading/redefining in the future
-            processDefinition(name, dependencies, definition);
-        }
-    }
-
-    function isVoid(value: any): value is void {
-        // true for both undefined and null
-        return value == null;
-    }
-
-    function processDefinition(name: string, dependencies: depslist, definition: defmodule): void {
+    function processDefinition(name: string, dependencies: depslist, definition: defmodule, state: state): void {
+        // Exclude require and exports as dependencies, both will be injected
+        // in resolve
         const deps = (dependencies.length > 0 && dependencies[0] === "require" && dependencies[1] === "exports") ?
             (dependencies.slice(2)) : dependencies;
 
-        if (deps.length === 0) modules[name] = resolve(name, [], definition);
-        else {
-            if (!(name in initializers)) {
-                initializers[name] = initializer.bind(null, name, deps, definition);
+        if (deps.length === 0) {
+            state.modules[name] = resolve(name, [], definition);
+            processUpstreamDependencies(name, state);
+        } else {
+            // Register an initializer which will manage executing a module's
+            // definition when all of it's dependencies are eventually available
+            if (!(name in state.trackers)) {
+                state.trackers[name] = track.bind(null, name, deps, definition, state);
             }
 
+            // Build an inverse dependency map, this allows initializers to
+            // track when all the module's definition become available
             deps.forEach((dependency) => {
-                if (!(dependency in inverseDependencyMap)) inverseDependencyMap[dependency] = {};
-                inverseDependencyMap[dependency][name] = null;
-                processDependencies(dependency);
+                if (!(dependency in state.inverseDependencyMap)) state.inverseDependencyMap[dependency] = {};
+                state.inverseDependencyMap[dependency][name] = null; // the value for a given key is irrelevant
+                processUpstreamDependencies(dependency, state);
             });
         }
     }
 
-    function initializer(name: string, dependencies: depslist, definition: defmodule): void {
-        // Counting down from deps.length to 0 using a local counter could be an optimization although less safe
-        if (dependencies.filter((dependency) => !(dependency in modules)).length === 0) {
-            modules[name] = resolve(name, dependencies.map((dependency) => modules[dependency]), definition)
-            processDependencies(name);
-            initializers[name] = null;
+    // Tracks the status of the definition of a module's dependencies    
+    function track(name: string, dependencies: depslist, definition: defmodule, state: state): void {
+        // When all depdendencies are defined, then execute the module's
+        // definition and notify all the upstream dependencies
+        if (dependencies.filter((dependency) => !(dependency in state.modules)).length === 0) {
+            state.modules[name] = resolve(name, dependencies.map((dependency) => state.modules[dependency]), definition);
+            processUpstreamDependencies(name, state);
+            state.trackers[name] = null;
+        }
+    }
+
+    function processUpstreamDependencies(name: string, state: state): void {
+        if (name in state.inverseDependencyMap) {
+            Object.keys(state.inverseDependencyMap[name]).forEach((parent) => {
+                if (state.trackers[parent] != null) state.trackers[parent]();
+            });
         }
     }
 
@@ -69,16 +79,20 @@ namespace AMD.ts {
         return Object.keys(exported).length === 0 ? returned : exported;
     }
 
-    function processDependencies(name: string): void {
-        // TODO: consider making this concurrent
-        if (name in inverseDependencyMap) {
-            Object.keys(inverseDependencyMap[name]).forEach((parent) => {
-                if (!isVoid(initializers[parent])) initializers[parent]();
-            });
-        }
+    if (name == null || dependencies == null || definition == null) {
+        throw new Error(`Missing or wrong parameters for module definition: name ${name} - dependencies ${dependencies} - definition ${definition}`);
     }
-}
 
-const
-    require = AMD.ts.require,
-    define = AMD.ts.define;
+    // Force typing to avoid compiler errors and force-casting define to any
+    const def: {
+        (name: string, dependencies: depslist, definition: defmodule): void,
+        __state__?: state
+    } = define;
+
+    // The state is kept as a property of the top-level define function to
+    // ensure it's available at the same time the function is and to avoid
+    // polluting the global scope.    
+    if (def.__state__ == null) def.__state__ = { inverseDependencyMap: {}, modules: {}, trackers: {} };
+
+    processDefinition(name, dependencies, definition, def.__state__);
+}
