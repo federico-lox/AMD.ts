@@ -1,6 +1,6 @@
 /// <reference path="../src/amd.ts" />
 interface Error {
-        stack: string;
+    stack: string;
 }
 
 namespace test {
@@ -13,26 +13,40 @@ namespace test {
 
     // Test variants of modules emitted by tsc...
 
-    // ... as a single dependency
-    require(['tst/single-export'], (s: any) => assert(s.plusOne(4) === 5));
-
-    // ... as multiple dependencies, one already defined
-    require(['tst/multiple-exports', 'tst/single-export'], (m: any, s: any) => {
-        assert(m.compare(new m.NumericValue(s.plusOne(4)), m.five) === true);
+    require(['tst/single-export'], (s: any) => {
+        console.log('Test single dependency...');
+        assert(s.plusOne(4) === 5)
+        console.log("PASSED!\n");
     });
 
-    // ... as multiple depdencies not yet defined
+    require(['tst/multiple-exports', 'tst/single-export'], (m: any, s: any) => {
+        console.log('Test multiple dependencies, one already defined...');
+        assert(m.compare(new m.NumericValue(s.plusOne(4)), m.five) === true);
+        console.log("PASSED!\n");
+    });
+
     require(['tst/assign-require', 'tst/import-as'], (r: any, i: any) => {
+        console.log('Test multiple dependencies, all not defined yet...');
         assert(r.test() === true);
         assert(i.default === true)
+        console.log("PASSED!\n");
     });
 
     // Test mixed sequence of inter-dependent modules
-    define('a', [], () => 2)
-    require(['b', 'c', 'a'], (b: any, c: any, a: any) => assert(b + c.a + a === 10));
-    define('b', ['c'], (c: any) => c.a + 2);
     define('c', ['a'], (a: any) => ({ a: 1 + a }));
-    require(['a', 'd'], (a: any, d: any) => assert(a + d.z === 10));
+    require(['b', 'c', 'a'], (b: any, c: any, a: any) => {
+        console.log('Test interdependent definitions 1/2...');
+        assert(b + c.a + a === 10)
+        console.log("PASSED!\n");
+    });
+    define('b', ['c'], (c: any) => c.a + 2);
+    define('a', [], () => 2)
+
+    require(['a', 'd'], (a: any, d: any) => {
+        console.log('Test interdependent definitions 2/2...');
+        assert(a + d.z === 10);
+        console.log("PASSED!\n");
+    });
     define('d', ['e'], (e: any) => ({ z: 4 + e }));
     define('e', ['a'], (a: any) => 2 + a);
 }
