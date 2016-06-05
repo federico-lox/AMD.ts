@@ -1,3 +1,7 @@
+v1.1.1
+------
+Updated all links and references after migrating the repository to Github.
+
 v1.1.0
 ------
 * Calls to describe and require can precede AMD.ts in a bundle (see issue #1)
