@@ -44,8 +44,9 @@ function define(name, dependencies, definition) {
     if (name == null || dependencies == null || definition == null) {
         throw new Error("Missing or wrong parameters for module definition: name " + name + " - dependencies " + dependencies + " - definition " + definition);
     }
-    var def = define;
-    if (def.__state__ == null)
-        def.__state__ = { inverseDependencyMap: {}, modules: {}, trackers: {} };
-    processDefinition(name, dependencies, definition, def.__state__);
+    processDefinition(name, dependencies, definition, define.__state__);
 }
+var define;
+(function (define) {
+    define.__state__ = { inverseDependencyMap: {}, modules: {}, trackers: {} };
+})(define || (define = {}));
